@@ -9,3 +9,5 @@ node_modules/
 tsconfig.build.json
 # Dist generated folder
 dist/
+# env
+*.env
