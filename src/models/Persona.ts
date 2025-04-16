@@ -1,4 +1,4 @@
-import { Auto } from "./Auto";
+import { Auto } from "./auto";
 
 export enum Genero {
     Masculino = 'Masculino',
