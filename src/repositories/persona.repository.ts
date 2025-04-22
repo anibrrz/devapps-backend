@@ -1,5 +1,5 @@
 import { personas } from "../data/data";
-import { Persona } from "../models/persona";
+import { Persona } from "../models/Persona";
 
 export class PersonaRepository {
   findAll(): Persona[] {

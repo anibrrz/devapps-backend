@@ -1,5 +1,5 @@
 import { personas } from "../data/data";
-import { Auto } from "../models/auto";
+import { Auto } from "../models/Auto";
 
 export class AutoRepository {
   findAll(): Auto[] {

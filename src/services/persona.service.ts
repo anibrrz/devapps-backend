@@ -1,5 +1,5 @@
 import { PersonaRepository } from "../repositories/persona.repository";
-import { Persona } from "../models/persona";
+import { Persona } from "../models/Persona";
 import { v4 as uuidv4 } from "uuid";
 
 export class PersonaService {

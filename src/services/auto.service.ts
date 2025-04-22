@@ -1,4 +1,4 @@
-import { Auto } from "../models/auto";
+import { Auto } from "../models/Auto";
 import { AutoRepository } from "../repositories/auto.repository";
 import { v4 as uuidv4 } from "uuid";
 

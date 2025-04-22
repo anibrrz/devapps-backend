@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { PersonaService } from "../services/persona.service";
-import { Genero } from "../models/persona";
+import { Genero } from "../models/Persona";
 
 const service = new PersonaService();
 
