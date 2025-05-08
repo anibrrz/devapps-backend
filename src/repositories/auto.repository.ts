@@ -3,12 +3,9 @@ import { Auto } from "../models/Auto";
 
 export class AutoRepository {
   findAll(): Auto[] {
-    return personas.flatMap(p => p.autos);
-  }
-
-  findByPersonaId(idPersona: string): Auto[] | undefined {
-    const persona = personas.find(p => p.id === idPersona);
-    return persona?.autos;
+    return personas.flatMap(p =>
+      p.autos.map(auto => ({ ...auto, dueñoId: p.id }))
+    );
   }
 
   findById(id: string): Auto | undefined {

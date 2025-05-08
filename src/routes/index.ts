@@ -1,6 +1,6 @@
 import express from "express";
 import { getAllPersonas, getPersonaById, createPersona, updatePersona, deletePersona } from "../controllers/persona.controller";
-import { getAllAutos, getAllAutosByIdPropietario, getAutoById, createAuto, updateAuto, deleteAuto } from "../controllers/auto.controller";
+import { getAllAutos, getAutoById, createAuto, updateAuto, deleteAuto } from "../controllers/auto.controller";
 
 const router = express.Router();
 
@@ -13,7 +13,6 @@ router.delete("/personas/:id", deletePersona);
 
 // Autos
 router.get("/autos", getAllAutos);
-router.get("/personas/:idPersona/autos", getAllAutosByIdPropietario);
 router.get("/autos/:id", getAutoById);
 router.post("/personas/:idPersona/autos", createAuto);
 router.put("/autos/:id", updateAuto);

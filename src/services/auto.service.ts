@@ -9,10 +9,6 @@ export class AutoService {
     return this.repo.findAll();
   }
 
-  getByPersonaId(id: string): Auto[] | undefined {
-    return this.repo.findByPersonaId(id);
-  }
-
   getById(id: string): Auto | undefined {
     return this.repo.findById(id);
   }
@@ -21,7 +17,7 @@ export class AutoService {
     const duplicado = this.repo.findByFullMatch(idPersona, data);
     if (duplicado) return null;
 
-    const nuevo: Auto = { ...data, id: uuidv4() };
+    const nuevo: Auto = { ...data, id: uuidv4(), dueñoId: idPersona };
     const guardado = this.repo.save(idPersona, nuevo);
     return guardado ? nuevo : null;
   }

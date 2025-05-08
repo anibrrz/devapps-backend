@@ -19,6 +19,7 @@ export const personas: Persona[] = [
         color: "Rojo",
         numeroChasis: "CHS123456",
         motor: "MTR654321",
+        dueñoId: "1",
       },
       {
         id: "2",
@@ -29,6 +30,7 @@ export const personas: Persona[] = [
         color: "Azul",
         numeroChasis: "CHS987654",
         motor: "MTR321654",
+        dueñoId: "1",
       },
     ],
   },
@@ -60,6 +62,7 @@ export const personas: Persona[] = [
         color: "Negro",
         numeroChasis: "CHS456123",
         motor: "MTR789654",
+        dueñoId: "3",
       },
     ],
   },

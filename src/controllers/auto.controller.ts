@@ -4,26 +4,12 @@ import { AutoService } from "../services/auto.service";
 const service = new AutoService();
 
 export const getAllAutos = (req: Request, res: Response) => {
-  const autos = service.getAll();
+  const { dueñoId } = req.query;
 
-  const autosFiltrados = autos.map(({ marca, modelo, año, patente }) => ({
-    marca,
-    modelo,
-    año,
-    patente
-  }));
+  let autos = service.getAll();
 
-  res.status(200).json(autosFiltrados);
-};
-
-export const getAllAutosByIdPropietario = (req: Request, res: Response) => {
-  const { idPersona } = req.params;
-
-  const autos = service.getByPersonaId(idPersona);
-
-  if (!autos) {
-    res.status(404).json({ mensaje: "Persona no encontrada" });
-    return;
+  if (dueñoId && typeof dueñoId === "string") {
+    autos = autos.filter(auto => auto.dueñoId === dueñoId);
   }
 
   const autosFiltrados = autos.map(({ marca, modelo, año, patente }) => ({
@@ -54,6 +40,8 @@ export const createAuto = (req: Request, res: Response) => {
   const { idPersona } = req.params;
   const { marca, modelo, año, patente, color, numeroChasis, motor } = req.body;
 
+
+
   const validaciones =
     typeof marca === "string" &&
     typeof modelo === "string" &&
@@ -75,7 +63,8 @@ export const createAuto = (req: Request, res: Response) => {
     patente,
     color,
     numeroChasis,
-    motor
+    motor,
+    dueñoId: idPersona,
   });
 
   if (!nuevoAuto) {
@@ -90,6 +79,11 @@ export const createAuto = (req: Request, res: Response) => {
 export const updateAuto = (req: Request, res: Response) => {
   const { id } = req.params;
   const datos = req.body;
+
+  if ("dueñoId" in datos) {
+    res.status(400).json({ mensaje: "No se puede modificar el dueño del auto" });
+    return;
+  }
 
   const validaciones: { [field: string]: (value: unknown) => boolean } = {
     marca: value => typeof value === "string",
@@ -109,7 +103,10 @@ export const updateAuto = (req: Request, res: Response) => {
   }
 
   const actualizado = service.update(id, datos);
-  if (!actualizado) res.status(404).json({ mensaje: "Auto no encontrado" });
+  if (!actualizado) {
+    res.status(404).json({ mensaje: "Auto no encontrado" });
+    return;
+  }
 
   res.sendStatus(201);
 };
