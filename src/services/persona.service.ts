@@ -1,9 +1,9 @@
-import { PersonaRepository } from "../repositories/persona.repository";
 import { Persona } from "../models/Persona";
 import { v4 as uuidv4 } from "uuid";
+import { PersonaStaticRepository } from "../repositories/PersonaStaticRepository";
 
 export class PersonaService {
-  private repo = new PersonaRepository();
+  private repo = new PersonaStaticRepository();
 
   getAll(): Persona[] {
     return this.repo.findAll();
@@ -18,7 +18,7 @@ export class PersonaService {
     if (duplicada) return null;
   
     const nueva: Persona = { ...data, id: uuidv4(), autos: [] };
-    this.repo.create(nueva);
+    this.repo.save(nueva);
     return nueva;
   }
 

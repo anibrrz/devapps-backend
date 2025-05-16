@@ -12,11 +12,13 @@ export const getAllAutos = (req: Request, res: Response) => {
     autos = autos.filter(auto => auto.dueñoId === dueñoId);
   }
 
-  const autosFiltrados = autos.map(({ marca, modelo, año, patente }) => ({
+  const autosFiltrados = autos.map(({ id, marca, modelo, año, patente, dueñoId }) => ({
+    id,
     marca,
     modelo,
     año,
-    patente
+    patente,
+    dueñoId
   }));
 
   res.status(200).json(autosFiltrados);
@@ -37,10 +39,7 @@ export const getAutoById = (req: Request, res: Response) => {
 };
 
 export const createAuto = (req: Request, res: Response) => {
-  const { idPersona } = req.params;
-  const { marca, modelo, año, patente, color, numeroChasis, motor } = req.body;
-
-
+  const { dueñoId, marca, modelo, año, patente, color, numeroChasis, motor } = req.body;
 
   const validaciones =
     typeof marca === "string" &&
@@ -56,7 +55,7 @@ export const createAuto = (req: Request, res: Response) => {
     return;
   }
 
-  const nuevoAuto = service.create(idPersona, {
+  const nuevoAuto = service.create(dueñoId, {
     marca,
     modelo,
     año,
@@ -64,7 +63,7 @@ export const createAuto = (req: Request, res: Response) => {
     color,
     numeroChasis,
     motor,
-    dueñoId: idPersona,
+    dueñoId,
   });
 
   if (!nuevoAuto) {

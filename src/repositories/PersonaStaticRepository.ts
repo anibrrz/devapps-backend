@@ -1,7 +1,8 @@
 import { personas } from "../data/data";
 import { Persona } from "../models/Persona";
+import { IRepository } from "./IRepository";
 
-export class PersonaRepository {
+export class PersonaStaticRepository implements IRepository<Persona> {
   findAll(): Persona[] {
     return personas;
   }
@@ -10,7 +11,7 @@ export class PersonaRepository {
     return personas.find(p => p.id === id);
   }
 
-  create(persona: Persona): void {
+  save(persona: Persona): void {
     personas.push(persona);
   }
 
