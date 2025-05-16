@@ -75,7 +75,7 @@ export const createAuto = (req: Request, res: Response) => {
   return;
 };
 
-export const updateAuto = (req: Request, res: Response) => {
+export const updateAuto = (req: Request, res: Response) => { 
   const { id } = req.params;
   const datos = req.body;
 
@@ -107,7 +107,7 @@ export const updateAuto = (req: Request, res: Response) => {
     return;
   }
 
-  res.sendStatus(201);
+  res.status(200).json(actualizado);
 };
 
 export const deleteAuto = (req: Request, res: Response) => {
