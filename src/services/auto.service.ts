@@ -1,9 +1,9 @@
 import { Auto } from "../models/Auto";
-import { AutoRepository } from "../repositories/auto.repository";
 import { v4 as uuidv4 } from "uuid";
+import { AutoTransientRepository } from "../repositories/Transient/AutoTransientRepository";
 
 export class AutoService {
-  private repo = new AutoRepository();
+  private repo = new AutoTransientRepository();
 
   getAll(): Auto[] {
     return this.repo.findAll();
@@ -18,7 +18,7 @@ export class AutoService {
     if (duplicado) return null;
 
     const nuevo: Auto = { ...data, id: uuidv4(), dueñoId: idPersona };
-    const guardado = this.repo.save(idPersona, nuevo);
+    const guardado = this.repo.saveWithOwner(idPersona, nuevo);
     return guardado ? nuevo : null;
   }
 

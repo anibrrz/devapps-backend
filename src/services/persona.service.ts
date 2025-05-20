@@ -1,9 +1,10 @@
 import { Persona } from "../models/Persona";
 import { v4 as uuidv4 } from "uuid";
-import { PersonaStaticRepository } from "../repositories/PersonaStaticRepository";
+import { IPersonaRepository } from "../repositories/IPersonaRepository";
+import { RepositoryFactory } from "../repositories/RepositoryFactory";
 
 export class PersonaService {
-  private repo = new PersonaStaticRepository();
+  private repo: IPersonaRepository = RepositoryFactory.personaRepository();
 
   getAll(): Persona[] {
     return this.repo.findAll();
@@ -16,7 +17,7 @@ export class PersonaService {
   create(data: Omit<Persona, "id" | "autos">): Persona | null {
     const duplicada = this.repo.findByFullMatch(data);
     if (duplicada) return null;
-  
+
     const nueva: Persona = { ...data, id: uuidv4(), autos: [] };
     this.repo.save(nueva);
     return nueva;

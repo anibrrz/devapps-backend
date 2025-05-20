@@ -1,42 +1,38 @@
 import process from 'process';
-import { IRepository } from './IRepository';
-import { Persona } from '../models/Persona';
-import { Auto } from '../models/Auto';
-import { PersonaStaticRepository } from './PersonaStaticRepository';
+import { IPersonaRepository } from './IPersonaRepository';
+import { IAutoRepository } from './IAutoRepository';
+import { PersonaTransientRepository } from './Transient/PersonaTransientRepository';
+import { AutoTransientRepository } from './Transient/AutoTransientRepository';
 
 export abstract class RepositoryFactory {
-    private static personaRepositorySingletonInstance: IRepository<Persona> | undefined = undefined;
-    private static autoRepositorySingletonInstance: IRepository<Auto> | undefined = undefined;
+  private static personaRepositorySingletonInstance: IPersonaRepository | undefined = undefined;
+  private static autoRepositorySingletonInstance: IAutoRepository | undefined = undefined;
 
-    public static personaRepository(): IRepository<Persona> {
-        if (RepositoryFactory.personaRepositorySingletonInstance === undefined) {
-            RepositoryFactory.personaRepositorySingletonInstance =
-                RepositoryFactory.getPersonaRepositoryByConfiguration();
-        }
-        return RepositoryFactory.personaRepositorySingletonInstance;
+  public static personaRepository(): IPersonaRepository {
+    if (this.personaRepositorySingletonInstance === undefined) {
+      this.personaRepositorySingletonInstance = this.getPersonaRepositoryByConfiguration();
     }
+    return this.personaRepositorySingletonInstance;
+  }
 
-    /*public static autoRepository(): IRepository<Auto> {
-        if (RepositoryFactory.autoRepositorySingletonInstance === undefined) {
-            RepositoryFactory.autoRepositorySingletonInstance = RepositoryFactory.getAutoRepositoryByConfiguration();
-        }
-        return RepositoryFactory.autoRepositorySingletonInstance;
+  public static autoRepository(): IAutoRepository {
+    if (this.autoRepositorySingletonInstance === undefined) {
+      this.autoRepositorySingletonInstance = this.getAutoRepositoryByConfiguration();
     }
-*/
-    private static getPersonaRepositoryByConfiguration(): IRepository<Persona> {
-        if (process.env.REPOSITORY === 'transient') {
-            return new PersonaStaticRepository();
-        }
-        // Default es transient
-        return new PersonaStaticRepository();
-    }
+    return this.autoRepositorySingletonInstance;
+  }
 
-    /*private static getAutoRepositoryByConfiguration(): IRepository<Auto> {
-        if (process.env.REPOSITORY === 'transient') {
-            return new AutoTransientRepository();
-        }
-        // Default es transient
-        return new AutoTransientRepository();
+  private static getPersonaRepositoryByConfiguration(): IPersonaRepository {
+    if (process.env.REPOSITORY === 'transient') {
+      return new PersonaTransientRepository();
     }
-        */
+    return new PersonaTransientRepository();
+  }
+
+  private static getAutoRepositoryByConfiguration(): IAutoRepository {
+    if (process.env.REPOSITORY === 'transient') {
+      return new AutoTransientRepository();
+    }
+    return new AutoTransientRepository();
+  }
 }

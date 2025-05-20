@@ -35,13 +35,13 @@ export const getAutoById = (req: Request, res: Response) => {
   }
 
   res.status(200).json(auto);
-  return;
 };
 
 export const createAuto = (req: Request, res: Response) => {
   const { dueñoId, marca, modelo, año, patente, color, numeroChasis, motor } = req.body;
 
   const validaciones =
+    typeof dueñoId === "string" &&
     typeof marca === "string" &&
     typeof modelo === "string" &&
     typeof año === "number" && !isNaN(año) &&
@@ -72,10 +72,9 @@ export const createAuto = (req: Request, res: Response) => {
   }
 
   res.status(201).json(nuevoAuto);
-  return;
 };
 
-export const updateAuto = (req: Request, res: Response) => { 
+export const updateAuto = (req: Request, res: Response) => {
   const { id } = req.params;
   const datos = req.body;
 

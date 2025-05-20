@@ -1,7 +1,8 @@
-import { personas } from "../data/data";
-import { Auto } from "../models/Auto";
+import { personas } from "../../data/data";
+import { Auto } from "../../models/Auto";
+import { IAutoRepository } from "../IAutoRepository";
 
-export class AutoRepository {
+export class AutoTransientRepository implements IAutoRepository {
   findAll(): Auto[] {
     return personas.flatMap(p =>
       p.autos.map(auto => ({ ...auto, dueñoId: p.id }))
@@ -11,15 +12,18 @@ export class AutoRepository {
   findById(id: string): Auto | undefined {
     for (const persona of personas) {
       const auto = persona.autos.find(a => a.id === id);
-      if (auto) return auto;
+      if (auto) return { ...auto, dueñoId: persona.id };
     }
     return undefined;
   }
 
-  save(idPersona: string, auto: Auto): boolean {
+  save(): void {
+    throw new Error('Use saveWithOwner(idPersona, auto) en lugar de save(auto).');
+  }
+
+  saveWithOwner(idPersona: string, auto: Auto): boolean {
     const persona = personas.find(p => p.id === idPersona);
     if (!persona) return false;
-
     persona.autos.push(auto);
     return true;
   }
@@ -46,7 +50,7 @@ export class AutoRepository {
     return false;
   }
 
-  findByFullMatch(idPersona: string, data: Omit<Auto, "id">): Auto | undefined {
+  findByFullMatch(idPersona: string, data: Omit<Auto, 'id'>): Auto | undefined {
     const persona = personas.find(p => p.id === idPersona);
     return persona?.autos.find(a =>
       a.marca === data.marca &&
@@ -58,5 +62,4 @@ export class AutoRepository {
       a.motor === data.motor
     );
   }
-
 }

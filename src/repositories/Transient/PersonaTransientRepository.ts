@@ -1,8 +1,8 @@
-import { personas } from "../data/data";
-import { Persona } from "../models/Persona";
-import { IRepository } from "./IRepository";
+import { personas } from "../../data/data";
+import { Persona } from "../../models/Persona";
+import { IPersonaRepository } from "../IPersonaRepository";
 
-export class PersonaStaticRepository implements IRepository<Persona> {
+export class PersonaTransientRepository implements IPersonaRepository {
   findAll(): Persona[] {
     return personas;
   }
@@ -39,5 +39,4 @@ export class PersonaStaticRepository implements IRepository<Persona> {
       p.donante === data.donante
     );
   }
-  
 }
