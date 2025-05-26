@@ -6,28 +6,28 @@ import { RepositoryFactory } from "../repositories/RepositoryFactory";
 export class PersonaService {
   private repo: IPersonaRepository = RepositoryFactory.personaRepository();
 
-  getAll(): Persona[] {
-    return this.repo.findAll();
+  async getAll(): Promise<Persona[]> {
+    return await this.repo.findAll();
   }
 
-  getById(id: string): Persona | undefined {
-    return this.repo.findById(id);
+  async getById(id: string): Promise<Persona | undefined> {
+    return await this.repo.findById(id);
   }
 
-  create(data: Omit<Persona, "id" | "autos">): Persona | null {
-    const duplicada = this.repo.findByFullMatch(data);
+  async create(data: Omit<Persona, "id" | "autos">): Promise<Persona | null> {
+    const duplicada = await this.repo.findByFullMatch(data);
     if (duplicada) return null;
 
     const nueva: Persona = { ...data, id: uuidv4(), autos: [] };
-    this.repo.save(nueva);
+    await this.repo.save(nueva);
     return nueva;
   }
 
-  update(id: string, data: Partial<Persona>): boolean {
-    return this.repo.update(id, data);
+  async update(id: string, data: Partial<Persona>): Promise<boolean> {
+    return await this.repo.update(id, data);
   }
 
-  delete(id: string): boolean {
-    return this.repo.delete(id);
+  async delete(id: string): Promise<boolean> {
+    return await this.repo.delete(id);
   }
 }

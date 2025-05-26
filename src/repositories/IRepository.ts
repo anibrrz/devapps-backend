@@ -1,7 +1,7 @@
 export interface IRepository<T> {
-  findAll(): T[];
-  findById(id: string): T | undefined;
-  save(entity: T): void;
-  update(id: string, entity: Partial<T>): boolean;
-  delete(id: string): boolean;
+  findAll(): Promise<T[]>;
+  findById(id: string): Promise<T | undefined>;
+  save(entity: T): Promise<void>;
+  update(id: string, entity: Partial<T>): Promise<boolean>;
+  delete(id: string): Promise<boolean>;
 }

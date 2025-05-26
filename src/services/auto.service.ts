@@ -1,32 +1,33 @@
 import { Auto } from "../models/Auto";
 import { v4 as uuidv4 } from "uuid";
-import { AutoTransientRepository } from "../repositories/Transient/AutoTransientRepository";
+import { IAutoRepository } from "../repositories/IAutoRepository";
+import { RepositoryFactory } from "../repositories/RepositoryFactory";
 
 export class AutoService {
-  private repo = new AutoTransientRepository();
+  private repo: IAutoRepository = RepositoryFactory.autoRepository();
 
-  getAll(): Auto[] {
-    return this.repo.findAll();
+  async getAll(): Promise<Auto[]> {
+    return await this.repo.findAll();
   }
 
-  getById(id: string): Auto | undefined {
-    return this.repo.findById(id);
+  async getById(id: string): Promise<Auto | undefined> {
+    return await this.repo.findById(id);
   }
 
-  create(idPersona: string, data: Omit<Auto, "id">): Auto | null {
-    const duplicado = this.repo.findByFullMatch(idPersona, data);
+  async create(idPersona: string, data: Omit<Auto, "id">): Promise<Auto | null> {
+    const duplicado = await this.repo.findByFullMatch(idPersona, data);
     if (duplicado) return null;
 
     const nuevo: Auto = { ...data, id: uuidv4(), dueñoId: idPersona };
-    const guardado = this.repo.saveWithOwner(idPersona, nuevo);
+    const guardado = await this.repo.saveWithOwner(idPersona, nuevo);
     return guardado ? nuevo : null;
   }
 
-  update(id: string, data: Partial<Auto>): boolean {
-    return this.repo.update(id, data);
+  async update(id: string, data: Partial<Auto>): Promise<boolean> {
+    return await this.repo.update(id, data);
   }
 
-  delete(id: string): boolean {
-    return this.repo.delete(id);
+  async delete(id: string): Promise<boolean> {
+    return await this.repo.delete(id);
   }
 }

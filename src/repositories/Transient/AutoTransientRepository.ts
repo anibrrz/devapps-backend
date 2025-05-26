@@ -3,13 +3,13 @@ import { Auto } from "../../models/Auto";
 import { IAutoRepository } from "../IAutoRepository";
 
 export class AutoTransientRepository implements IAutoRepository {
-  findAll(): Auto[] {
+  async findAll(): Promise<Auto[]> {
     return personas.flatMap(p =>
       p.autos.map(auto => ({ ...auto, dueñoId: p.id }))
     );
   }
 
-  findById(id: string): Auto | undefined {
+  async findById(id: string): Promise<Auto | undefined> {
     for (const persona of personas) {
       const auto = persona.autos.find(a => a.id === id);
       if (auto) return { ...auto, dueñoId: persona.id };
@@ -17,18 +17,18 @@ export class AutoTransientRepository implements IAutoRepository {
     return undefined;
   }
 
-  save(): void {
+  async save(): Promise<void> {
     throw new Error('Use saveWithOwner(idPersona, auto) en lugar de save(auto).');
   }
 
-  saveWithOwner(idPersona: string, auto: Auto): boolean {
+  async saveWithOwner(idPersona: string, auto: Auto): Promise<boolean> {
     const persona = personas.find(p => p.id === idPersona);
     if (!persona) return false;
     persona.autos.push(auto);
     return true;
   }
 
-  update(id: string, data: Partial<Auto>): boolean {
+  async update(id: string, data: Partial<Auto>): Promise<boolean> {
     for (const persona of personas) {
       const auto = persona.autos.find(a => a.id === id);
       if (auto) {
@@ -39,7 +39,7 @@ export class AutoTransientRepository implements IAutoRepository {
     return false;
   }
 
-  delete(id: string): boolean {
+  async delete(id: string): Promise<boolean> {
     for (const persona of personas) {
       const index = persona.autos.findIndex(a => a.id === id);
       if (index !== -1) {
@@ -50,7 +50,7 @@ export class AutoTransientRepository implements IAutoRepository {
     return false;
   }
 
-  findByFullMatch(idPersona: string, data: Omit<Auto, 'id'>): Auto | undefined {
+  async findByFullMatch(idPersona: string, data: Omit<Auto, 'id'>): Promise<Auto | undefined> {
     const persona = personas.find(p => p.id === idPersona);
     return persona?.autos.find(a =>
       a.marca === data.marca &&
