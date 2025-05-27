@@ -5,6 +5,7 @@ import bodyParser from 'body-parser';
 import helmet from 'helmet';
 import process from 'process';
 import router from './routes';
+import { connectToMongo } from './DB/MongoClient';
 
 // Creamos nuestra app express
 const app = express();
@@ -20,6 +21,13 @@ app.use(bodyParser.json());
 app.use('/', router);
 
 // Levantamos el servidor en el puerto que configuramos
-app.listen(port, () => {
-    console.log(`Example app listening on port ${port}`);
-});
+connectToMongo()
+  .then(() => {
+    app.listen(port, () => {
+      console.log(`Servidor corriendo en http://localhost:${port}`);
+    });
+  })
+  .catch((error) => {
+    console.error("No se pudo iniciar el servidor por un error de conexión a MongoDB:", error);
+    process.exit(1); // termina la app si no se puede conectar
+  });
