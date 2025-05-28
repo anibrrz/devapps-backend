@@ -1,5 +1,5 @@
+import { ObjectId } from "mongodb";
 import { Persona } from "../models/Persona";
-import { v4 as uuidv4 } from "uuid";
 import { IPersonaRepository } from "../repositories/IPersonaRepository";
 import { RepositoryFactory } from "../repositories/RepositoryFactory";
 
@@ -14,14 +14,20 @@ export class PersonaService {
     return await this.repo.findById(id);
   }
 
-  async create(data: Omit<Persona, "id" | "autos">): Promise<Persona | null> {
+  async create(data: Omit<Persona, "_id" | "autos">): Promise<Persona | null> {
     const duplicada = await this.repo.findByFullMatch(data);
     if (duplicada) return null;
 
-    const nueva: Persona = { ...data, id: uuidv4(), autos: [] };
+    const nueva: Persona = {
+      _id: new ObjectId(),
+      ...data,
+      autos: []
+    };
+
     await this.repo.save(nueva);
     return nueva;
   }
+
 
   async update(id: string, data: Partial<Persona>): Promise<boolean> {
     return await this.repo.update(id, data);

@@ -1,3 +1,4 @@
+import { ObjectId } from "mongodb";
 import { Auto } from "./Auto";
 
 export enum Genero {
@@ -7,7 +8,7 @@ export enum Genero {
 }
 
 export interface Persona {
-    id: string;
+    _id: ObjectId
     nombre: string;
     apellido: string;
     dni: string;

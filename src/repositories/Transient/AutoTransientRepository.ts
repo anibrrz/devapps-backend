@@ -1,18 +1,20 @@
 import { personas } from "../../data/data";
 import { Auto } from "../../models/Auto";
 import { IAutoRepository } from "../IAutoRepository";
+import { ObjectId } from "mongodb";
 
 export class AutoTransientRepository implements IAutoRepository {
   async findAll(): Promise<Auto[]> {
     return personas.flatMap(p =>
-      p.autos.map(auto => ({ ...auto, dueñoId: p.id }))
+      p.autos.map(auto => ({ ...auto, dueñoId: p._id }))
     );
   }
 
   async findById(id: string): Promise<Auto | undefined> {
+    const autoId = new ObjectId(id);
     for (const persona of personas) {
-      const auto = persona.autos.find(a => a.id === id);
-      if (auto) return { ...auto, dueñoId: persona.id };
+      const auto = persona.autos.find(a => a._id.equals(autoId));
+      if (auto) return { ...auto, dueñoId: persona._id };
     }
     return undefined;
   }
@@ -22,15 +24,17 @@ export class AutoTransientRepository implements IAutoRepository {
   }
 
   async saveWithOwner(idPersona: string, auto: Auto): Promise<boolean> {
-    const persona = personas.find(p => p.id === idPersona);
+    const personaId = new ObjectId(idPersona);
+    const persona = personas.find(p => p._id.equals(personaId));
     if (!persona) return false;
     persona.autos.push(auto);
     return true;
   }
 
   async update(id: string, data: Partial<Auto>): Promise<boolean> {
+    const autoId = new ObjectId(id);
     for (const persona of personas) {
-      const auto = persona.autos.find(a => a.id === id);
+      const auto = persona.autos.find(a => a._id.equals(autoId));
       if (auto) {
         Object.assign(auto, data);
         return true;
@@ -40,8 +44,9 @@ export class AutoTransientRepository implements IAutoRepository {
   }
 
   async delete(id: string): Promise<boolean> {
+    const autoId = new ObjectId(id);
     for (const persona of personas) {
-      const index = persona.autos.findIndex(a => a.id === id);
+      const index = persona.autos.findIndex(a => a._id.equals(autoId));
       if (index !== -1) {
         persona.autos.splice(index, 1);
         return true;
@@ -50,8 +55,9 @@ export class AutoTransientRepository implements IAutoRepository {
     return false;
   }
 
-  async findByFullMatch(idPersona: string, data: Omit<Auto, 'id'>): Promise<Auto | undefined> {
-    const persona = personas.find(p => p.id === idPersona);
+  async findByFullMatch(idPersona: string, data: Omit<Auto, '_id' | 'dueñoId'>): Promise<Auto | undefined> {
+    const personaId = new ObjectId(idPersona);
+    const persona = personas.find(p => p._id.equals(personaId));
     return persona?.autos.find(a =>
       a.marca === data.marca &&
       a.modelo === data.modelo &&

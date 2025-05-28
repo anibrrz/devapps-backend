@@ -36,5 +36,5 @@ export abstract class RepositoryFactory {
       return new AutoMongoRepository();
     }
     return new AutoTransientRepository();
-  }
+    }
 }

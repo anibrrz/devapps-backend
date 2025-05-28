@@ -1,7 +1,7 @@
 import { Auto } from "../models/Auto";
-import { v4 as uuidv4 } from "uuid";
 import { IAutoRepository } from "../repositories/IAutoRepository";
 import { RepositoryFactory } from "../repositories/RepositoryFactory";
+import { ObjectId } from "mongodb";
 
 export class AutoService {
   private repo: IAutoRepository = RepositoryFactory.autoRepository();
@@ -14,11 +14,16 @@ export class AutoService {
     return await this.repo.findById(id);
   }
 
-  async create(idPersona: string, data: Omit<Auto, "id">): Promise<Auto | null> {
+  async create(idPersona: string, data: Omit<Auto, "_id" | "dueñoId">): Promise<Auto | null> {
     const duplicado = await this.repo.findByFullMatch(idPersona, data);
     if (duplicado) return null;
 
-    const nuevo: Auto = { ...data, id: uuidv4(), dueñoId: idPersona };
+    const nuevo: Auto = {
+      ...data,
+      _id: new ObjectId(),
+      dueñoId: new ObjectId(idPersona)
+    };
+
     const guardado = await this.repo.saveWithOwner(idPersona, nuevo);
     return guardado ? nuevo : null;
   }

@@ -1,13 +1,14 @@
 import { Request, Response } from "express";
 import { PersonaService } from "../services/persona.service";
 import { Genero } from "../models/Persona";
+import { ObjectId } from "mongodb";
 
 const service = new PersonaService();
 
 export const getAllPersonas = async (req: Request, res: Response) => {
   const personas = await service.getAll();
   const resumen = personas.map((persona) => ({
-    id: persona.id,
+    id: persona._id?.toString(),
     nombre: persona.nombre,
     apellido: persona.apellido,
     dni: persona.dni,
@@ -19,6 +20,11 @@ export const getAllPersonas = async (req: Request, res: Response) => {
 export const getPersonaById = async (req: Request, res: Response) => {
   const { id } = req.params;
 
+  if (!ObjectId.isValid(id)) {
+    res.status(400).json({ mensaje: "ID inválido" });
+    return;
+  }
+
   const persona = await service.getById(id);
 
   if (!persona) {
@@ -26,7 +32,10 @@ export const getPersonaById = async (req: Request, res: Response) => {
     return;
   }
 
-  res.status(200).json(persona);
+  res.status(200).json({
+    ...persona,
+    _id: persona._id?.toString(),
+  });
 };
 
 export const createPersona = async (req: Request, res: Response) => {
@@ -63,12 +72,20 @@ export const createPersona = async (req: Request, res: Response) => {
     return;
   }
 
-  res.status(201).json(personaNueva);
+  res.status(201).json({
+    ...personaNueva,
+    _id: personaNueva._id?.toString(),
+  });
 };
 
 export const updatePersona = async (req: Request, res: Response) => {
   const { id } = req.params;
   const datos = req.body;
+
+  if (!ObjectId.isValid(id)) {
+    res.status(400).json({ mensaje: "ID inválido" });
+    return;
+  }
 
   const validaciones: { [field: string]: (value: unknown) => boolean } = {
     nombre: value => typeof value === "string",
@@ -101,6 +118,11 @@ export const updatePersona = async (req: Request, res: Response) => {
 
 export const deletePersona = async (req: Request, res: Response) => {
   const { id } = req.params;
+
+  if (!ObjectId.isValid(id)) {
+    res.status(400).json({ mensaje: "ID inválido" });
+    return;
+  }
 
   const eliminado = await service.delete(id);
   if (!eliminado) {

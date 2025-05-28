@@ -1,6 +1,7 @@
 import { IPersonaRepository } from "../IPersonaRepository";
 import { Persona } from "../../models/Persona";
 import { getMongoDb } from "../../DB/MongoClient";
+import { ObjectId } from "mongodb";
 
 export class PersonaMongoRepository implements IPersonaRepository {
   private readonly collectionName = "personas";
@@ -12,30 +13,34 @@ export class PersonaMongoRepository implements IPersonaRepository {
 
   async findById(id: string): Promise<Persona | undefined> {
     const db = getMongoDb();
-    const persona = await db.collection<Persona>(this.collectionName).findOne({ id });
+    const persona = await db
+      .collection<Persona>(this.collectionName)
+      .findOne({ _id: new ObjectId(id) });
     return persona ?? undefined;
   }
 
-  async save(persona: Persona): Promise<void> {
+  async save(persona: Omit<Persona, "_id">): Promise<void> {
     const db = getMongoDb();
-    await db.collection<Persona>(this.collectionName).insertOne(persona);
+    await db.collection<Omit<Persona, "_id">>(this.collectionName).insertOne(persona);
   }
 
   async update(id: string, entity: Partial<Persona>): Promise<boolean> {
     const db = getMongoDb();
     const result = await db
       .collection<Persona>(this.collectionName)
-      .updateOne({ id }, { $set: entity });
+      .updateOne({ _id: new ObjectId(id) }, { $set: entity });
     return result.modifiedCount > 0;
   }
 
   async delete(id: string): Promise<boolean> {
     const db = getMongoDb();
-    const result = await db.collection<Persona>(this.collectionName).deleteOne({ id });
+    const result = await db
+      .collection<Persona>(this.collectionName)
+      .deleteOne({ _id: new ObjectId(id) });
     return result.deletedCount > 0;
   }
 
-  async findByFullMatch(data: Omit<Persona, "id" | "autos">): Promise<Persona | undefined> {
+  async findByFullMatch(data: Omit<Persona, "_id" | "autos">): Promise<Persona | undefined> {
     const db = getMongoDb();
     const persona = await db.collection<Persona>(this.collectionName).findOne({
       nombre: data.nombre,

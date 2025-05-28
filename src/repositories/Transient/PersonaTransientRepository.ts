@@ -1,42 +1,52 @@
-import { personas } from "../../data/data";
-import { Persona } from "../../models/Persona";
 import { IPersonaRepository } from "../IPersonaRepository";
+import { Persona } from "../../models/Persona";
+import { ObjectId } from "mongodb";
 
 export class PersonaTransientRepository implements IPersonaRepository {
+  private personas: Persona[] = [];
+
   async findAll(): Promise<Persona[]> {
-    return personas;
+    return this.personas;
   }
 
   async findById(id: string): Promise<Persona | undefined> {
-    return personas.find(p => p.id === id);
+    return this.personas.find((p) => p._id?.toString() === id);
   }
 
-  async save(persona: Persona): Promise<void> {
-    personas.push(persona);
+  async save(persona: Omit<Persona, "_id">): Promise<void> {
+    const nueva: Persona = {
+      ...persona,
+      _id: new ObjectId(),
+    };
+    this.personas.push(nueva);
   }
 
-  async update(id: string, updated: Partial<Persona>): Promise<boolean> {
-    const index = personas.findIndex(p => p.id === id);
+  async update(id: string, entity: Partial<Persona>): Promise<boolean> {
+    const index = this.personas.findIndex((p) => p._id?.toString() === id);
     if (index === -1) return false;
-    personas[index] = { ...personas[index], ...updated };
+
+    this.personas[index] = {
+      ...this.personas[index],
+      ...entity,
+    };
     return true;
   }
 
   async delete(id: string): Promise<boolean> {
-    const index = personas.findIndex(p => p.id === id);
-    if (index === -1) return false;
-    personas.splice(index, 1);
-    return true;
+    const prevLength = this.personas.length;
+    this.personas = this.personas.filter((p) => p._id?.toString() !== id);
+    return this.personas.length < prevLength;
   }
 
-  async findByFullMatch(data: Omit<Persona, "id" | "autos">): Promise<Persona | undefined> {
-    return personas.find(p =>
-      p.nombre === data.nombre &&
-      p.apellido === data.apellido &&
-      p.dni === data.dni &&
-      p.fechaNacimiento.toISOString() === new Date(data.fechaNacimiento).toISOString() &&
-      p.genero === data.genero &&
-      p.donante === data.donante
+  async findByFullMatch(data: Omit<Persona, "_id" | "autos">): Promise<Persona | undefined> {
+    return this.personas.find(
+      (p) =>
+        p.nombre === data.nombre &&
+        p.apellido === data.apellido &&
+        p.dni === data.dni &&
+        p.genero === data.genero &&
+        p.donante === data.donante &&
+        p.fechaNacimiento.toISOString() === new Date(data.fechaNacimiento).toISOString()
     );
   }
 }
