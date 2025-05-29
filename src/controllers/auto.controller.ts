@@ -14,7 +14,7 @@ export const getAllAutos = async (req: Request, res: Response) => {
     }
 
     const autosFiltrados = autos.map(({ _id, marca, modelo, año, patente, dueñoId }) => ({
-        id: _id.toString(),
+        _id: _id.toString(),
         marca,
         modelo,
         año,

@@ -8,7 +8,7 @@ const service = new PersonaService();
 export const getAllPersonas = async (req: Request, res: Response) => {
   const personas = await service.getAll();
   const resumen = personas.map((persona) => ({
-    id: persona._id?.toString(),
+    _id: persona._id?.toString(),
     nombre: persona.nombre,
     apellido: persona.apellido,
     dni: persona.dni,
