@@ -1,9 +1,10 @@
 import { IPersonaRepository } from "../IPersonaRepository";
 import { Persona } from "../../models/Persona";
 import { ObjectId } from "mongodb";
+import { personas as data } from "../../data/data";
 
 export class PersonaTransientRepository implements IPersonaRepository {
-  private personas: Persona[] = [];
+  private personas: Persona[] = [...data];
 
   async findAll(): Promise<Persona[]> {
     return this.personas;
@@ -46,7 +47,7 @@ export class PersonaTransientRepository implements IPersonaRepository {
         p.dni === data.dni &&
         p.genero === data.genero &&
         p.donante === data.donante &&
-        p.fechaNacimiento.toISOString() === new Date(data.fechaNacimiento).toISOString()
+        p.fechaNacimiento === data.fechaNacimiento
     );
   }
 }

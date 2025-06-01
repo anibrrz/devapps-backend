@@ -11,10 +11,13 @@ export class AutoService {
   }
 
   async getById(id: string): Promise<Auto | undefined> {
+    if (!ObjectId.isValid(id)) return undefined;
     return await this.repo.findById(id);
   }
 
   async create(idPersona: string, data: Omit<Auto, "_id" | "dueñoId">): Promise<Auto | null> {
+    if (!ObjectId.isValid(idPersona)) return null;
+
     const duplicado = await this.repo.findByFullMatch(idPersona, data);
     if (duplicado) return null;
 
@@ -28,11 +31,14 @@ export class AutoService {
     return guardado ? nuevo : null;
   }
 
+
   async update(id: string, data: Partial<Auto>): Promise<boolean> {
+    if (!ObjectId.isValid(id)) return false;
     return await this.repo.update(id, data);
   }
 
   async delete(id: string): Promise<boolean> {
+    if (!ObjectId.isValid(id)) return false;
     return await this.repo.delete(id);
   }
 }

@@ -5,8 +5,11 @@ import { PersonaTransientRepository } from './Transient/PersonaTransientReposito
 import { AutoTransientRepository } from './Transient/AutoTransientRepository';
 import { PersonaMongoRepository } from './Mongo/PersonaMongoRepository';
 import { AutoMongoRepository } from './Mongo/AutoMongoRepository';
+import { PersonaFirebaseRepository } from './Firebase/PersonaFirebaseRepository';
+import { AutoFirebaseRepository } from './Firebase/AutoFirebaseRepository';
 
 export abstract class RepositoryFactory {
+
   private static personaRepositorySingletonInstance: IPersonaRepository | undefined = undefined;
   private static autoRepositorySingletonInstance: IAutoRepository | undefined = undefined;
 
@@ -28,6 +31,9 @@ export abstract class RepositoryFactory {
     if (process.env.REPOSITORY === 'mongo') {
       return new PersonaMongoRepository();
     }
+    if (process.env.REPOSITORY === 'firebase') {
+      return new PersonaFirebaseRepository();
+    }
     return new PersonaTransientRepository();
   }
 
@@ -35,6 +41,9 @@ export abstract class RepositoryFactory {
     if (process.env.REPOSITORY === 'mongo') {
       return new AutoMongoRepository();
     }
-    return new AutoTransientRepository();
+    if (process.env.REPOSITORY === 'firebase') {
+      return new AutoFirebaseRepository();
     }
+    return new AutoTransientRepository();
+  }
 }

@@ -1,5 +1,5 @@
 import { ObjectId } from "mongodb";
-import { Auto } from "./Auto";
+import { Auto, FirebaseAuto } from "./Auto";
 
 export enum Genero {
     Masculino = 'Masculino',
@@ -12,9 +12,19 @@ export interface Persona {
     nombre: string;
     apellido: string;
     dni: string;
-    fechaNacimiento: Date;
+    fechaNacimiento: string;
     genero: Genero;
     donante: boolean;
     autos: Auto[];
 
+}
+
+export interface FirebasePersona {
+  nombre: string;
+  apellido: string;
+  dni: string;
+  fechaNacimiento: string;
+  genero: "Masculino" | "Femenino" | "NoBinario";
+  donante: boolean;
+  autos: FirebaseAuto[];
 }

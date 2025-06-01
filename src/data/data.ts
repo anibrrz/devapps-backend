@@ -7,7 +7,7 @@ export const personas: Persona[] = [
     nombre: "Jungkook",
     apellido: "Jeon",
     dni: "12345678",
-    fechaNacimiento: new Date(1997, 9, 1),
+    fechaNacimiento: "1997-09-01",
     genero: Genero.Masculino,
     donante: true,
     autos: [
@@ -40,7 +40,7 @@ export const personas: Persona[] = [
     nombre: "Namjoon",
     apellido: "Kim",
     dni: "87654321",
-    fechaNacimiento: new Date(1994, 9, 12),
+    fechaNacimiento: "1994-09-12",
     genero: Genero.Masculino,
     donante: true,
     autos: [],
@@ -50,7 +50,7 @@ export const personas: Persona[] = [
     nombre: "Hoseok",
     apellido: "Jung",
     dni: "11223344",
-    fechaNacimiento: new Date(1994, 2, 18),
+    fechaNacimiento: "1994-02-18",
     genero: Genero.Masculino,
     donante: true,
     autos: [

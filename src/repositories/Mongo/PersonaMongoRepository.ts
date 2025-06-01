@@ -48,7 +48,7 @@ export class PersonaMongoRepository implements IPersonaRepository {
       dni: data.dni,
       genero: data.genero,
       donante: data.donante,
-      fechaNacimiento: new Date(data.fechaNacimiento),
+      fechaNacimiento: data.fechaNacimiento,
     });
     return persona ?? undefined;
   }

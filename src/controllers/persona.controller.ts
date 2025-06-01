@@ -62,7 +62,7 @@ export const createPersona = async (req: Request, res: Response) => {
     nombre,
     apellido,
     dni,
-    fechaNacimiento: new Date(fechaNacimiento),
+    fechaNacimiento,
     genero,
     donante,
   });

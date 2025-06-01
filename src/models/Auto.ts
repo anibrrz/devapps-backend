@@ -11,3 +11,14 @@ export interface Auto {
   motor: string;
   dueñoId: ObjectId;
 }
+
+export interface FirebaseAuto {
+  _id: string;
+  marca: string;
+  modelo: string;
+  año: number;
+  patente: string;
+  color: string;
+  numeroChasis: string;
+  motor: string;
+}
