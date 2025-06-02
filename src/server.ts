@@ -6,6 +6,7 @@ import helmet from 'helmet';
 import process from 'process';
 import router from './routes';
 import { connectToMongo } from './DB/MongoClient';
+import { errorHandler } from './middlewares/errorHandler';
 
 // Creamos nuestra app express
 const app = express();
@@ -20,6 +21,9 @@ app.use(helmet());
 app.use(bodyParser.json());
 
 app.use('/', router);
+
+// Middleware de errores
+app.use(errorHandler);
 
 // Levantamos el servidor en el puerto que configuramos
 if (process.env.REPOSITORY === 'mongo') {

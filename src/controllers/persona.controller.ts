@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { PersonaService } from "../services/persona.service";
 import { Genero } from "../models/Persona";
 import { ObjectId } from "mongodb";
+import { AppError } from "../errors/AppError";
 
 const service = new PersonaService();
 
@@ -20,17 +21,11 @@ export const getAllPersonas = async (req: Request, res: Response) => {
 export const getPersonaById = async (req: Request, res: Response) => {
   const { id } = req.params;
 
-  if (!ObjectId.isValid(id)) {
-    res.status(400).json({ mensaje: "ID inválido" });
-    return;
-  }
+  if (!ObjectId.isValid(id)) throw new AppError("ID inválido", 400);
 
   const persona = await service.getById(id);
 
-  if (!persona) {
-    res.status(404).json({ mensaje: "Persona no encontrada" });
-    return;
-  }
+  if (!persona) throw new AppError("Persona no encontrada", 404);
 
   res.status(200).json({
     ...persona,
@@ -53,10 +48,7 @@ export const createPersona = async (req: Request, res: Response) => {
     generoValido &&
     typeof donante === "boolean";
 
-  if (!datosValidos) {
-    res.status(400).json({ mensaje: "Datos inválidos o incompletos" });
-    return;
-  }
+  if (!datosValidos) throw new AppError("Datos inválidos o incompletos", 400);
 
   const personaNueva = await service.create({
     nombre,
@@ -67,10 +59,7 @@ export const createPersona = async (req: Request, res: Response) => {
     donante,
   });
 
-  if (!personaNueva) {
-    res.status(409).json({ mensaje: "Ya existe una persona con los mismos datos" });
-    return;
-  }
+  if (!personaNueva) throw new AppError("Ya existe una persona con los mismos datos", 409);
 
   res.status(201).json({
     ...personaNueva,
@@ -82,10 +71,7 @@ export const updatePersona = async (req: Request, res: Response) => {
   const { id } = req.params;
   const datos = req.body;
 
-  if (!ObjectId.isValid(id)) {
-    res.status(400).json({ mensaje: "ID inválido" });
-    return;
-  }
+  if (!ObjectId.isValid(id)) throw new AppError("ID inválido", 400);
 
   const validaciones: { [field: string]: (value: unknown) => boolean } = {
     nombre: value => typeof value === "string",
@@ -98,8 +84,7 @@ export const updatePersona = async (req: Request, res: Response) => {
 
   for (const key in datos) {
     if (key in validaciones && !validaciones[key](datos[key])) {
-      res.status(400).json({ mensaje: `Campo inválido: ${key}` });
-      return;
+      throw new AppError(`Campo inválido: ${key}`, 400);
     }
   }
 
@@ -108,27 +93,17 @@ export const updatePersona = async (req: Request, res: Response) => {
   }
 
   const actualizado = await service.update(id, datos);
-  if (!actualizado) {
-    res.status(404).json({ mensaje: "Persona no encontrada" });
-    return;
-  }
-
+  if (!actualizado) throw new AppError("Persona no encontrada", 404);
   res.sendStatus(201);
 };
 
 export const deletePersona = async (req: Request, res: Response) => {
   const { id } = req.params;
 
-  if (!ObjectId.isValid(id)) {
-    res.status(400).json({ mensaje: "ID inválido" });
-    return;
-  }
+  if (!ObjectId.isValid(id)) throw new AppError("ID inválido", 400);
 
   const eliminado = await service.delete(id);
-  if (!eliminado) {
-    res.status(404).json({ mensaje: "Persona no encontrada" });
-    return;
-  }
+  if (!eliminado) throw new AppError("Persona no encontrada", 404);
 
   res.sendStatus(200);
 };

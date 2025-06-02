@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { AutoService } from "../services/auto.service";
 import { ObjectId } from "mongodb";
+import { AppError } from "../errors/AppError";
 
 const service = new AutoService();
 
@@ -30,10 +31,7 @@ export const getAutoById = async (req: Request, res: Response) => {
     const { id } = req.params;
     const auto = await service.getById(id);
 
-    if (!auto) {
-        res.status(404).json({ mensaje: "Auto no encontrado" });
-        return;
-    }
+    if (!auto) throw new AppError("Auto no encontrado", 404);
 
     res.status(200).json(auto);
 };
@@ -51,10 +49,7 @@ export const createAuto = async (req: Request, res: Response) => {
         typeof numeroChasis === "string" &&
         typeof motor === "string";
 
-    if (!validaciones) {
-        res.status(400).json({ mensaje: "Datos inválidos o incompletos" });
-        return;
-    }
+    if (!validaciones) throw new AppError("Datos inválidos o incompletos", 400);
 
     const nuevoAuto = await service.create(dueñoId, {
         marca,
@@ -66,10 +61,7 @@ export const createAuto = async (req: Request, res: Response) => {
         motor,
     });
 
-    if (!nuevoAuto) {
-        res.status(409).json({ mensaje: "Ya existe un auto con los mismos datos" });
-        return;
-    }
+    if (!nuevoAuto) throw new AppError("Ya existe un auto con los mismos datos", 409);
 
     res.status(201).json(nuevoAuto);
 };
@@ -78,10 +70,7 @@ export const updateAuto = async (req: Request, res: Response) => {
     const { id } = req.params;
     const datos = req.body;
 
-    if ("dueñoId" in datos) {
-        res.status(400).json({ mensaje: "No se puede modificar el dueño del auto" });
-        return;
-    }
+    if ("dueñoId" in datos) throw new AppError("No se puede modificar el dueño del auto", 400);
 
     const validaciones: { [field: string]: (value: unknown) => boolean } = {
         marca: value => typeof value === "string",
@@ -95,16 +84,12 @@ export const updateAuto = async (req: Request, res: Response) => {
 
     for (const key in datos) {
         if (key in validaciones && !validaciones[key](datos[key])) {
-            res.status(400).json({ mensaje: `Campo inválido: ${key}` });
-            return;
+            throw new AppError(`Campo inválido: ${key}`, 400);
         }
     }
 
     const actualizado = await service.update(id, datos);
-    if (!actualizado) {
-        res.status(404).json({ mensaje: "Auto no encontrado" });
-        return;
-    }
+    if (!actualizado) throw new AppError("Auto no encontrado", 404);
 
     res.status(200).json(actualizado);
 };
@@ -113,10 +98,7 @@ export const deleteAuto = async (req: Request, res: Response) => {
     const { id } = req.params;
     const eliminado = await service.delete(id);
 
-    if (!eliminado) {
-        res.status(404).json({ mensaje: "Auto no encontrado" });
-        return;
-    }
+    if (!eliminado) throw new AppError("Auto no encontrado", 404);
 
     res.sendStatus(200);
 };
