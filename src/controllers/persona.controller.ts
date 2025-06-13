@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 import { PersonaService } from "../services/persona.service";
 import { Genero } from "../models/Persona";
-import { ObjectId } from "mongodb";
 import { AppError } from "../errors/AppError";
 
 const service = new PersonaService();
@@ -9,7 +8,7 @@ const service = new PersonaService();
 export const getAllPersonas = async (req: Request, res: Response) => {
   const personas = await service.getAll();
   const resumen = personas.map((persona) => ({
-    _id: persona._id?.toString(),
+    _id: persona._id,
     nombre: persona.nombre,
     apellido: persona.apellido,
     dni: persona.dni,
@@ -21,16 +20,11 @@ export const getAllPersonas = async (req: Request, res: Response) => {
 export const getPersonaById = async (req: Request, res: Response) => {
   const { id } = req.params;
 
-  if (!ObjectId.isValid(id)) throw new AppError("ID inválido", 400);
-
   const persona = await service.getById(id);
 
   if (!persona) throw new AppError("Persona no encontrada", 404);
 
-  res.status(200).json({
-    ...persona,
-    _id: persona._id?.toString(),
-  });
+  res.status(200).json(persona);
 };
 
 export const createPersona = async (req: Request, res: Response) => {
@@ -61,17 +55,12 @@ export const createPersona = async (req: Request, res: Response) => {
 
   if (!personaNueva) throw new AppError("Ya existe una persona con los mismos datos", 409);
 
-  res.status(201).json({
-    ...personaNueva,
-    _id: personaNueva._id?.toString(),
-  });
+  res.status(201).json(personaNueva);
 };
 
 export const updatePersona = async (req: Request, res: Response) => {
   const { id } = req.params;
   const datos = req.body;
-
-  if (!ObjectId.isValid(id)) throw new AppError("ID inválido", 400);
 
   const validaciones: { [field: string]: (value: unknown) => boolean } = {
     nombre: value => typeof value === "string",
@@ -99,8 +88,6 @@ export const updatePersona = async (req: Request, res: Response) => {
 
 export const deletePersona = async (req: Request, res: Response) => {
   const { id } = req.params;
-
-  if (!ObjectId.isValid(id)) throw new AppError("ID inválido", 400);
 
   const eliminado = await service.delete(id);
   if (!eliminado) throw new AppError("Persona no encontrada", 404);

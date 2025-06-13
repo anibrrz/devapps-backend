@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
 import { AutoService } from "../services/auto.service";
-import { ObjectId } from "mongodb";
 import { AppError } from "../errors/AppError";
 
 const service = new AutoService();
@@ -10,9 +9,8 @@ export const getAllAutos = async (req: Request, res: Response) => {
 
     let autos = await service.getAll();
 
-    if (dueñoId && typeof dueñoId === "string" && ObjectId.isValid(dueñoId)) {
-        const dueñoObjectId = new ObjectId(dueñoId);
-        autos = autos.filter(auto => auto.dueñoId.equals?.(dueñoObjectId));
+    if (dueñoId && typeof dueñoId === "string") {
+        autos = autos.filter(auto => auto.dueñoId === dueñoId);
     }
 
     const autosFiltrados = autos.map(({ _id, marca, modelo, año, patente, dueñoId }) => ({

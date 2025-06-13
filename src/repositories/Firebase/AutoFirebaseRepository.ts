@@ -1,10 +1,7 @@
 import { IAutoRepository } from "../IAutoRepository";
 import { firestore } from "../../DB/Firebase";
-import { ObjectId } from "mongodb";
 import { FieldValue } from "firebase-admin/firestore";
 import { Auto } from "../../models/Auto";
-import { FirebasePersona } from "../../models/Persona";
-import { autoToFirebase, firebaseToAuto, isValidObjectId } from "./firebaseMappers";
 
 export class AutoFirebaseRepository implements IAutoRepository {
     private readonly collection = firestore.collection("personas");
@@ -14,14 +11,12 @@ export class AutoFirebaseRepository implements IAutoRepository {
         const autos: Auto[] = [];
 
         snapshot.forEach(doc => {
-            if (!isValidObjectId(doc.id)) return;
-
-            const personaId = new ObjectId(doc.id);
-            const data = doc.data() as FirebasePersona;
+            const personaId = doc.id;
+            const data = doc.data();
 
             if (Array.isArray(data.autos)) {
                 data.autos.forEach(auto => {
-                    autos.push(firebaseToAuto(auto, personaId));
+                    autos.push({ ...auto, dueñoId: personaId });
                 });
             }
         });
@@ -30,17 +25,14 @@ export class AutoFirebaseRepository implements IAutoRepository {
     }
 
     async findById(id: string): Promise<Auto | undefined> {
-        const autoIdStr = new ObjectId(id).toHexString();
         const snapshot = await this.collection.get();
 
         for (const doc of snapshot.docs) {
-            if (!isValidObjectId(doc.id)) continue;
+            const personaId = doc.id;
+            const autos = doc.data().autos ?? [];
 
-            const personaId = new ObjectId(doc.id);
-            const data = doc.data() as FirebasePersona;
-
-            const match = data.autos.find(auto => auto._id === autoIdStr);
-            if (match) return firebaseToAuto(match, personaId);
+            const match = autos?.find((auto: Auto) => auto._id === id);
+            if (match) return { ...match, dueñoId: personaId };
         }
 
         return undefined;
@@ -51,48 +43,46 @@ export class AutoFirebaseRepository implements IAutoRepository {
     }
 
     async saveWithOwner(idPersona: string, auto: Auto): Promise<boolean> {
-        if (!isValidObjectId(idPersona)) return false;
-
         const docRef = this.collection.doc(idPersona);
         const doc = await docRef.get();
         if (!doc.exists) return false;
 
-        const autoFirebase = autoToFirebase(auto);
-        await docRef.update({
-            autos: FieldValue.arrayUnion(autoFirebase),
-        });
+        const persona = doc.data();
+    const autos: Auto[] = Array.isArray(persona?.autos) ? persona.autos : [];
 
-        return true;
+    const existe = autos.some(a =>
+        a.marca === auto.marca &&
+        a.modelo === auto.modelo &&
+        a.año === auto.año &&
+        a.patente === auto.patente &&
+        a.color === auto.color &&
+        a.numeroChasis === auto.numeroChasis &&
+        a.motor === auto.motor
+    );
+
+    if (existe) return false;
+
+    await docRef.update({
+        autos: FieldValue.arrayUnion(auto)
+    });
+
+    return true;
     }
 
     async update(id: string, data: Partial<Auto>): Promise<boolean> {
-        const autoIdStr = new ObjectId(id).toHexString();
         const snapshot = await this.collection.get();
 
         for (const doc of snapshot.docs) {
-            if (!isValidObjectId(doc.id)) continue;
+            const personaId = doc.id;
+            const autos = doc.data().autos ?? [];
 
-            const personaId = new ObjectId(doc.id);
-            const persona = doc.data() as FirebasePersona;
-            const autos = persona.autos ?? [];
-
-            const index = autos.findIndex(auto => auto._id === autoIdStr);
+            const index = autos.findIndex((auto: Auto) => auto._id === id);
             if (index !== -1) {
-                const originalAuto = firebaseToAuto(autos[index], personaId);
+                const updatedAuto = { ...autos[index], ...data };
+                const newAutos = [...autos];
+                newAutos[index] = updatedAuto;
 
-                const mergedAuto: Auto = {
-                    ...originalAuto,
-                    ...data,
-                    _id: new ObjectId(autoIdStr),
-                    dueñoId: personaId,
-                };
-
-                const updatedAuto = autoToFirebase(mergedAuto);
-
-                const updatedAutos = [...autos];
-                updatedAutos[index] = updatedAuto;
-
-                await this.collection.doc(doc.id).update({ autos: updatedAutos });
+                await this.collection.doc(personaId).update({ autos: newAutos });
                 return true;
             }
         }
@@ -101,17 +91,12 @@ export class AutoFirebaseRepository implements IAutoRepository {
     }
 
     async delete(id: string): Promise<boolean> {
-        const autoIdStr = new ObjectId(id).toHexString();
         const snapshot = await this.collection.get();
 
         for (const doc of snapshot.docs) {
-            if (!isValidObjectId(doc.id)) continue;
+            const autos = doc.data().autos ?? [];
 
-            const persona = doc.data() as FirebasePersona;
-            const autos = persona.autos ?? [];
-
-            const updatedAutos = autos.filter(auto => auto._id !== autoIdStr);
-
+            const updatedAutos = autos.filter((auto: Auto) => auto._id !== id);
             if (updatedAutos.length !== autos.length) {
                 await this.collection.doc(doc.id).update({ autos: updatedAutos });
                 return true;
@@ -119,25 +104,5 @@ export class AutoFirebaseRepository implements IAutoRepository {
         }
 
         return false;
-    }
-
-    async findByFullMatch(idPersona: string, data: Omit<Auto, "_id" | "dueñoId">): Promise<Auto | undefined> {
-        if (!isValidObjectId(idPersona)) return undefined;
-
-        const doc = await this.collection.doc(idPersona).get();
-        if (!doc.exists) return undefined;
-
-        const persona = doc.data() as FirebasePersona;
-        const match = persona.autos?.find(auto =>
-            auto.marca === data.marca &&
-            auto.modelo === data.modelo &&
-            auto.año === data.año &&
-            auto.patente === data.patente &&
-            auto.color === data.color &&
-            auto.numeroChasis === data.numeroChasis &&
-            auto.motor === data.motor
-        );
-
-        return match ? firebaseToAuto(match, new ObjectId(idPersona)) : undefined;
     }
 }

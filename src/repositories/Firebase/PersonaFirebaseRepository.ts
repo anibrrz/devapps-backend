@@ -1,59 +1,68 @@
 import { IPersonaRepository } from "../IPersonaRepository";
-import { Persona, FirebasePersona } from "../../models/Persona";
+import { Persona } from "../../models/Persona";
 import { firestore } from "../../DB/Firebase";
-import { ObjectId } from "mongodb";
-import { autoToFirebase, firebaseToPersona, isValidObjectId, personaToFirebase } from "./firebaseMappers";
+
+function normalizePersona(doc: FirebaseFirestore.DocumentSnapshot): Persona {
+    const data = doc.data();
+
+    if (!data) {
+        throw new Error("Documento vacío o no encontrado");
+    }
+
+    const fecha = data.fechaNacimiento;
+
+    return {
+        _id: doc.id,
+        nombre: data.nombre,
+        apellido: data.apellido,
+        dni: data.dni,
+        genero: data.genero,
+        donante: data.donante,
+        autos: data.autos ?? [],
+        fechaNacimiento: typeof fecha === "string"
+            ? fecha
+            : fecha.toDate().toISOString().split("T")[0]
+    };
+}
 
 export class PersonaFirebaseRepository implements IPersonaRepository {
     private readonly collection = firestore.collection("personas");
 
     async findAll(): Promise<Persona[]> {
         const snapshot = await this.collection.get();
-        return snapshot.docs
-            .filter(doc => isValidObjectId(doc.id))
-            .map(doc => firebaseToPersona(doc.data() as FirebasePersona, doc.id));
+        return snapshot.docs.map(normalizePersona);
     }
 
     async findById(id: string): Promise<Persona | undefined> {
-        if (!isValidObjectId(id)) return undefined;
-
         const doc = await this.collection.doc(id).get();
         if (!doc.exists) return undefined;
-        return firebaseToPersona(doc.data() as FirebasePersona, doc.id);
+        return normalizePersona(doc);
     }
 
-    async save(persona: Omit<Persona, "_id">): Promise<void> {
-        const id = new ObjectId();
-        const personaFirebase = personaToFirebase({ ...persona, _id: id });
-        await this.collection.doc(id.toHexString()).set(personaFirebase);
+    async save(persona: Persona): Promise<void> {
+        await this.collection.doc(persona._id).set({
+            ...persona,
+            fechaNacimiento: typeof persona.fechaNacimiento === "string"
+                ? persona.fechaNacimiento
+                : new Date(persona.fechaNacimiento).toISOString().split("T")[0]
+        });
     }
 
     async update(id: string, entity: Partial<Persona>): Promise<boolean> {
-        if (!isValidObjectId(id)) return false;
-
         const docRef = this.collection.doc(id);
         const doc = await docRef.get();
         if (!doc.exists) return false;
+        await docRef.update({
+            ...entity,
+            fechaNacimiento: entity.fechaNacimiento && typeof entity.fechaNacimiento !== "string"
+                ? new Date(entity.fechaNacimiento).toISOString().split("T")[0]
+                : entity.fechaNacimiento
+        });
 
-        const updateData: Partial<FirebasePersona> = {};
-
-        if (entity.nombre !== undefined) updateData.nombre = entity.nombre;
-        if (entity.apellido !== undefined) updateData.apellido = entity.apellido;
-        if (entity.dni !== undefined) updateData.dni = entity.dni;
-        if (entity.genero !== undefined) updateData.genero = entity.genero;
-        if (entity.donante !== undefined) updateData.donante = entity.donante;
-        if (entity.fechaNacimiento !== undefined)
-            updateData.fechaNacimiento = entity.fechaNacimiento;
-        if (entity.autos !== undefined)
-            updateData.autos = entity.autos.map(autoToFirebase);
-
-        await docRef.update(updateData);
         return true;
     }
 
     async delete(id: string): Promise<boolean> {
-        if (!isValidObjectId(id)) return false;
-
         const docRef = this.collection.doc(id);
         const doc = await docRef.get();
         if (!doc.exists) return false;
@@ -75,8 +84,9 @@ export class PersonaFirebaseRepository implements IPersonaRepository {
         if (snapshot.empty) return undefined;
 
         const doc = snapshot.docs[0];
-        if (!isValidObjectId(doc.id)) return undefined;
-
-        return firebaseToPersona(doc.data() as FirebasePersona, doc.id);
+        return {
+            _id: doc.id,
+            ...doc.data()
+        } as Persona;
     }
 }

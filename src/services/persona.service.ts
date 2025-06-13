@@ -1,5 +1,5 @@
-import { ObjectId } from "mongodb";
 import { Persona } from "../models/Persona";
+import { v4 as uuidv4 } from "uuid";
 import { IPersonaRepository } from "../repositories/IPersonaRepository";
 import { RepositoryFactory } from "../repositories/RepositoryFactory";
 
@@ -11,7 +11,6 @@ export class PersonaService {
   }
 
   async getById(id: string): Promise<Persona | undefined> {
-    if (!ObjectId.isValid(id)) return undefined;
     return await this.repo.findById(id);
   }
 
@@ -19,23 +18,16 @@ export class PersonaService {
     const duplicada = await this.repo.findByFullMatch(data);
     if (duplicada) return null;
 
-    const nueva: Persona = {
-      _id: new ObjectId(),
-      ...data,
-      autos: []
-    };
-
+    const nueva: Persona = { ...data, _id: uuidv4(), autos: [] };
     await this.repo.save(nueva);
     return nueva;
   }
 
   async update(id: string, data: Partial<Persona>): Promise<boolean> {
-    if (!ObjectId.isValid(id)) return false;
     return await this.repo.update(id, data);
   }
 
   async delete(id: string): Promise<boolean> {
-    if (!ObjectId.isValid(id)) return false;
     return await this.repo.delete(id);
   }
 }

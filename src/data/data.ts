@@ -1,9 +1,8 @@
-import { ObjectId } from "mongodb";
 import { Genero, Persona } from "../models/Persona";
 
 export const personas: Persona[] = [
   {
-    _id: new ObjectId("000000000000000000000001"),
+    _id: "1",
     nombre: "Jungkook",
     apellido: "Jeon",
     dni: "12345678",
@@ -12,7 +11,7 @@ export const personas: Persona[] = [
     donante: true,
     autos: [
       {
-        _id: new ObjectId("100000000000000000000001"),
+        _id: "1",
         marca: "Toyota",
         modelo: "Corolla",
         año: 2020,
@@ -20,10 +19,10 @@ export const personas: Persona[] = [
         color: "Rojo",
         numeroChasis: "CHS123456",
         motor: "MTR654321",
-        dueñoId: new ObjectId("000000000000000000000001"),
+        dueñoId: "1"
       },
       {
-        _id: new ObjectId("100000000000000000000002"),
+        _id: "2",
         marca: "Ford",
         modelo: "Fiesta",
         año: 2018,
@@ -31,12 +30,12 @@ export const personas: Persona[] = [
         color: "Azul",
         numeroChasis: "CHS987654",
         motor: "MTR321654",
-        dueñoId: new ObjectId("000000000000000000000001"),
+        dueñoId: "1",
       },
     ],
   },
   {
-    _id: new ObjectId("000000000000000000000002"),
+    _id: "2",
     nombre: "Namjoon",
     apellido: "Kim",
     dni: "87654321",
@@ -46,7 +45,7 @@ export const personas: Persona[] = [
     autos: [],
   },
   {
-    _id: new ObjectId("000000000000000000000003"),
+    _id:"3",
     nombre: "Hoseok",
     apellido: "Jung",
     dni: "11223344",
@@ -55,7 +54,7 @@ export const personas: Persona[] = [
     donante: true,
     autos: [
       {
-        _id: new ObjectId("100000000000000000000003"),
+        _id: "3",
         marca: "Chevrolet",
         modelo: "Onix",
         año: 2022,
@@ -63,7 +62,7 @@ export const personas: Persona[] = [
         color: "Negro",
         numeroChasis: "CHS456123",
         motor: "MTR789654",
-        dueñoId: new ObjectId("000000000000000000000003"),
+        dueñoId: "3",
       },
     ],
   },
